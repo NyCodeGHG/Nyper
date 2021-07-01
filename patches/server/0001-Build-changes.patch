@@ -5,7 +5,7 @@ Subject: [PATCH] Build changes
 
 
 diff --git a/build.gradle.kts b/build.gradle.kts
-index 5540da58e66f83b283863d3158a9b4ab5ba636db..333182b6964222af854560fe45a0e90fdcb7ed25 100644
+index 5540da58e66f83b283863d3158a9b4ab5ba636db..422220402396410a57f844f8c1286fcf2f1d1a7a 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
 @@ -30,8 +30,8 @@ repositories {
@@ -24,7 +24,7 @@ index 5540da58e66f83b283863d3158a9b4ab5ba636db..333182b6964222af854560fe45a0e90f
              "Main-Class" to "org.bukkit.craftbukkit.Main",
              "Implementation-Title" to "CraftBukkit",
 -            "Implementation-Version" to "git-Paper-$implementationVersion",
-+            "Implementation-Version" to "git-Nyper-$implementationVersion",
++            "Implementation-Version" to "git-Nyper-$implementationVersion", // Nyper
              "Implementation-Vendor" to SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").format(Date()), // Paper
              "Specification-Title" to "Bukkit",
              "Specification-Version" to project.version,
@@ -63,3 +63,16 @@ index 2ba3b01092cef23bcc958244992ef44103bc7e74..830e54896612c682ec0a99396d37b1a9
      private final String serverVersion;
      private final String bukkitVersion = Versioning.getBukkitVersion();
      private final Logger logger = Logger.getLogger("Minecraft");
+diff --git a/src/main/java/org/bukkit/craftbukkit/util/Versioning.java b/src/main/java/org/bukkit/craftbukkit/util/Versioning.java
+index 774556a62eb240da42e84db4502e2ed43495be17..be99d076c8edb0d081a82c78e3a9045599ed8497 100644
+--- a/src/main/java/org/bukkit/craftbukkit/util/Versioning.java
++++ b/src/main/java/org/bukkit/craftbukkit/util/Versioning.java
+@@ -11,7 +11,7 @@ public final class Versioning {
+     public static String getBukkitVersion() {
+         String result = "Unknown-Version";
+ 
+-        InputStream stream = Bukkit.class.getClassLoader().getResourceAsStream("META-INF/maven/io.papermc.paper/paper-api/pom.properties");
++        InputStream stream = Bukkit.class.getClassLoader().getResourceAsStream("META-INF/maven/de.nycode.nyper/nyper-api/pom.properties"); // Nyper
+         Properties properties = new Properties();
+ 
+         if (stream != null) {
