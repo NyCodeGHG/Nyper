@@ -1,0 +1,88 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: NyCode <nico@nycode.de>
+Date: Thu, 1 Jul 2021 15:23:51 +0200
+Subject: [PATCH] Update paper version fetcher
+
+
+diff --git a/src/main/java/com/destroystokyo/paper/PaperVersionFetcher.java b/src/main/java/com/destroystokyo/paper/PaperVersionFetcher.java
+index 580bae0d414d371a07a6bfeefc41fdd989dc0083..de9a43d6ba15ee5b0cf74bc4f7add191ef678ba7 100644
+--- a/src/main/java/com/destroystokyo/paper/PaperVersionFetcher.java
++++ b/src/main/java/com/destroystokyo/paper/PaperVersionFetcher.java
+@@ -3,7 +3,10 @@ package com.destroystokyo.paper;
+ import com.destroystokyo.paper.util.VersionFetcher;
+ import com.google.common.base.Charsets;
+ import com.google.common.io.Resources;
+-import com.google.gson.*;
++import com.google.gson.Gson;
++import com.google.gson.JsonArray;
++import com.google.gson.JsonObject;
++import com.google.gson.JsonSyntaxException;
+ import net.kyori.adventure.text.Component;
+ import net.kyori.adventure.text.TextComponent;
+ import net.kyori.adventure.text.format.NamedTextColor;
+@@ -11,14 +14,16 @@ import net.kyori.adventure.text.format.TextDecoration;
+ 
+ import javax.annotation.Nonnull;
+ import javax.annotation.Nullable;
+-import java.io.*;
++import java.io.BufferedReader;
++import java.io.IOException;
++import java.io.InputStreamReader;
+ import java.net.HttpURLConnection;
+ import java.net.URL;
+ import java.util.stream.StreamSupport;
+ 
+ public class PaperVersionFetcher implements VersionFetcher {
+     private static final java.util.regex.Pattern VER_PATTERN = java.util.regex.Pattern.compile("^([0-9\\.]*)\\-.*R"); // R is an anchor, will always give '-R' at end
+-    private static final String GITHUB_BRANCH_NAME = "master";
++    private static final String GITHUB_BRANCH_NAME = "main"; // Nyper
+     private static @Nullable String mcVer;
+ 
+     @Override
+@@ -29,8 +34,8 @@ public class PaperVersionFetcher implements VersionFetcher {
+     @Nonnull
+     @Override
+     public Component getVersionMessage(@Nonnull String serverVersion) {
+-        String[] parts = serverVersion.substring("git-Paper-".length()).split("[-\\s]");
+-        final Component updateMessage = getUpdateStatusMessage("PaperMC/Paper", GITHUB_BRANCH_NAME, parts[0]);
++        String[] parts = serverVersion.substring("git-Nyper-".length()).split("[-\\s]"); // Nyper
++        final Component updateMessage = getUpdateStatusMessage("NyCodeGHG/Nyper", GITHUB_BRANCH_NAME, parts[0]); // Nyper
+         final Component history = getHistory();
+ 
+         return history != null ? TextComponent.ofChildren(updateMessage, Component.newline(), history) : updateMessage;
+@@ -53,25 +58,17 @@ public class PaperVersionFetcher implements VersionFetcher {
+     }
+ 
+     private static Component getUpdateStatusMessage(@Nonnull String repo, @Nonnull String branch, @Nonnull String versionInfo) {
+-        int distance;
+-        try {
+-            int jenkinsBuild = Integer.parseInt(versionInfo);
+-            distance = fetchDistanceFromSiteApi(jenkinsBuild, getMinecraftVersion());
+-        } catch (NumberFormatException ignored) {
+-            versionInfo = versionInfo.replace("\"", "");
+-            distance = fetchDistanceFromGitHub(repo, branch, versionInfo);
+-        }
++        // Nyper we don't have a Site API or Jenkins
++        versionInfo = versionInfo.replace("\"", "");
++        int distance = fetchDistanceFromGitHub(repo, branch, versionInfo);
+ 
+-        switch (distance) {
+-            case -1:
+-                return Component.text("Error obtaining version information", NamedTextColor.YELLOW);
+-            case 0:
+-                return Component.text("You are running the latest version", NamedTextColor.GREEN);
+-            case -2:
+-                return Component.text("Unknown version", NamedTextColor.YELLOW);
+-            default:
+-                return Component.text("You are " + distance + " version(s) behind", NamedTextColor.YELLOW);
+-        }
++        return switch (distance) {
++            case -1 -> Component.text("Error obtaining version information", NamedTextColor.YELLOW);
++            case 0 -> Component.text("You are running the latest version", NamedTextColor.GREEN);
++            case -2 -> Component.text("Unknown version", NamedTextColor.YELLOW);
++            default -> Component.text("You are " + distance + " version(s) behind", NamedTextColor.YELLOW);
++        };
++        // Nyper we don't have a Site API or Jenkins
+     }
+ 
+     private static int fetchDistanceFromSiteApi(int jenkinsBuild, @Nullable String siteApiVersion) {

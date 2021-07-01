@@ -5,7 +5,7 @@ Subject: [PATCH] Velocity environment variable configuration
 
 
 diff --git a/src/main/java/com/destroystokyo/paper/PaperConfig.java b/src/main/java/com/destroystokyo/paper/PaperConfig.java
-index 7acf077bc131af718c7548cc29deef558c04e463..2d1f60342edd3527aa6d9ae2c9ce64e60f35ec95 100644
+index 73652e403eaa419fb5b4b54bd506f246c0aa4e99..35085ac44de0eeee32ef51a769574e448d007cc7 100644
 --- a/src/main/java/com/destroystokyo/paper/PaperConfig.java
 +++ b/src/main/java/com/destroystokyo/paper/PaperConfig.java
 @@ -1,8 +1,20 @@
