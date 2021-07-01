@@ -5,7 +5,7 @@ Subject: [PATCH] Build changes
 
 
 diff --git a/build.gradle.kts b/build.gradle.kts
-index 5540da58e66f83b283863d3158a9b4ab5ba636db..a2c7c819b5e67723c0322c0801477615906b2db5 100644
+index 5540da58e66f83b283863d3158a9b4ab5ba636db..333182b6964222af854560fe45a0e90fdcb7ed25 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
 @@ -30,8 +30,8 @@ repositories {
@@ -28,15 +28,7 @@ index 5540da58e66f83b283863d3158a9b4ab5ba636db..a2c7c819b5e67723c0322c0801477615
              "Implementation-Vendor" to SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").format(Date()), // Paper
              "Specification-Title" to "Bukkit",
              "Specification-Version" to project.version,
-@@ -162,7 +162,6 @@ abstract class IncludeMappings : BaseTask() {
- }
- 
- val includeMappings = tasks.register<IncludeMappings>("includeMappings") {
--    inputJar.set(tasks.fixJarForReobf.flatMap { it.outputJar })
-     mappings.set(tasks.reobfJar.flatMap { it.mappingsFile })
- }
- 
-@@ -178,7 +177,7 @@ tasks.test {
+@@ -178,7 +178,7 @@ tasks.test {
  fun TaskContainer.registerRunTask(
      name: String, block: JavaExec.() -> Unit
  ): TaskProvider<JavaExec> = register<JavaExec>(name) {
