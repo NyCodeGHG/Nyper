@@ -1,0 +1,24 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: NyCode <nico@nycode.de>
+Date: Thu, 1 Jul 2021 20:18:59 +0000
+Subject: [PATCH] Configure publishing
+
+
+diff --git a/build.gradle.kts b/build.gradle.kts
+index e142072f31a41b25ac637970f79e71ab70c2f28c..47f744a4b294bb2aebe09cde5b25fe783a062060 100644
+--- a/build.gradle.kts
++++ b/build.gradle.kts
+@@ -3,6 +3,7 @@ import java.util.Locale
+ plugins {
+     `java-library`
+     `maven-publish`
++    signing
+ }
+ 
+ java {
+@@ -76,3 +77,5 @@ tasks.withType<Javadoc>().configureEach {
+         "https://javadoc.io/doc/net.md-5/bungeecord-chat/1.16-R0.4/"
+     )
+ }
++
++apply(from = "../publishing.gradle.kts")
