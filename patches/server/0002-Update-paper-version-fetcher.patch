@@ -5,7 +5,7 @@ Subject: [PATCH] Update paper version fetcher
 
 
 diff --git a/src/main/java/com/destroystokyo/paper/PaperVersionFetcher.java b/src/main/java/com/destroystokyo/paper/PaperVersionFetcher.java
-index 580bae0d414d371a07a6bfeefc41fdd989dc0083..de9a43d6ba15ee5b0cf74bc4f7add191ef678ba7 100644
+index 580bae0d414d371a07a6bfeefc41fdd989dc0083..6541147cdec3e9aa191ac3ea64926c888eaf2e5c 100644
 --- a/src/main/java/com/destroystokyo/paper/PaperVersionFetcher.java
 +++ b/src/main/java/com/destroystokyo/paper/PaperVersionFetcher.java
 @@ -3,7 +3,10 @@ package com.destroystokyo.paper;
@@ -20,7 +20,7 @@ index 580bae0d414d371a07a6bfeefc41fdd989dc0083..de9a43d6ba15ee5b0cf74bc4f7add191
  import net.kyori.adventure.text.Component;
  import net.kyori.adventure.text.TextComponent;
  import net.kyori.adventure.text.format.NamedTextColor;
-@@ -11,14 +14,16 @@ import net.kyori.adventure.text.format.TextDecoration;
+@@ -11,16 +14,25 @@ import net.kyori.adventure.text.format.TextDecoration;
  
  import javax.annotation.Nonnull;
  import javax.annotation.Nullable;
@@ -29,7 +29,12 @@ index 580bae0d414d371a07a6bfeefc41fdd989dc0083..de9a43d6ba15ee5b0cf74bc4f7add191
 +import java.io.IOException;
 +import java.io.InputStreamReader;
  import java.net.HttpURLConnection;
++import java.net.URI;
  import java.net.URL;
++import java.net.http.HttpClient;
++import java.net.http.HttpRequest;
++import java.net.http.HttpResponse.BodyHandlers;
++import java.time.Duration;
  import java.util.stream.StreamSupport;
  
  public class PaperVersionFetcher implements VersionFetcher {
@@ -38,8 +43,12 @@ index 580bae0d414d371a07a6bfeefc41fdd989dc0083..de9a43d6ba15ee5b0cf74bc4f7add191
 +    private static final String GITHUB_BRANCH_NAME = "main"; // Nyper
      private static @Nullable String mcVer;
  
++    private static final HttpClient client = HttpClient.newHttpClient(); // Nyper
++
      @Override
-@@ -29,8 +34,8 @@ public class PaperVersionFetcher implements VersionFetcher {
+     public long getCacheTime() {
+         return 720000;
+@@ -29,8 +41,8 @@ public class PaperVersionFetcher implements VersionFetcher {
      @Nonnull
      @Override
      public Component getVersionMessage(@Nonnull String serverVersion) {
@@ -50,7 +59,7 @@ index 580bae0d414d371a07a6bfeefc41fdd989dc0083..de9a43d6ba15ee5b0cf74bc4f7add191
          final Component history = getHistory();
  
          return history != null ? TextComponent.ofChildren(updateMessage, Component.newline(), history) : updateMessage;
-@@ -53,25 +58,17 @@ public class PaperVersionFetcher implements VersionFetcher {
+@@ -53,25 +65,17 @@ public class PaperVersionFetcher implements VersionFetcher {
      }
  
      private static Component getUpdateStatusMessage(@Nonnull String repo, @Nonnull String branch, @Nonnull String versionInfo) {
@@ -86,3 +95,49 @@ index 580bae0d414d371a07a6bfeefc41fdd989dc0083..de9a43d6ba15ee5b0cf74bc4f7add191
      }
  
      private static int fetchDistanceFromSiteApi(int jenkinsBuild, @Nullable String siteApiVersion) {
+@@ -101,25 +105,31 @@ public class PaperVersionFetcher implements VersionFetcher {
+     // Contributed by Techcable <Techcable@outlook.com> in GH-65
+     private static int fetchDistanceFromGitHub(@Nonnull String repo, @Nonnull String branch, @Nonnull String hash) {
+         try {
+-            HttpURLConnection connection = (HttpURLConnection) new URL("https://api.github.com/repos/" + repo + "/compare/" + branch + "..." + hash).openConnection();
+-            connection.connect();
+-            if (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) return -2; // Unknown commit
+-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), Charsets.UTF_8))) {
+-                JsonObject obj = new Gson().fromJson(reader, JsonObject.class);
++            // Nyper start
++            var request = HttpRequest.newBuilder()
++                .uri(URI.create("https://api.github.com/repos/%s/compare/%s...%s".formatted(repo, branch, hash)))
++                .timeout(Duration.ofSeconds(10))
++                .header("Accept", "application/vnd.github.v3+json")
++                .GET()
++                .build();
++            var response = client.send(request, BodyHandlers.ofString());
++
++            if (response.statusCode() == HttpURLConnection.HTTP_NOT_FOUND) return -2; // Unknown commit
++            
++            try {
++                JsonObject obj = new Gson().fromJson(response.body(), JsonObject.class);
+                 String status = obj.get("status").getAsString();
+-                switch (status) {
+-                    case "identical":
+-                        return 0;
+-                    case "behind":
+-                        return obj.get("behind_by").getAsInt();
+-                    default:
+-                        return -1;
+-                }
++                return switch (status) {
++                    case "identical" -> 0;
++                    case "behind" -> obj.get("behind_by").getAsInt();
++                    default -> -1;
++                };
++                // Nyper end
+             } catch (JsonSyntaxException | NumberFormatException e) {
+                 e.printStackTrace();
+                 return -1;
+             }
+-        } catch (IOException e) {
++        } catch (IOException | InterruptedException e) {
+             e.printStackTrace();
+             return -1;
+         }
