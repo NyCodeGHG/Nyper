@@ -5,10 +5,10 @@ Subject: [PATCH] Build changes
 
 
 diff --git a/build.gradle.kts b/build.gradle.kts
-index 1d3a9297544b48ee045905b220735f99d9b5c341..460c0ab661ae75382dfd86f8d56a8e8d6fb3bbc4 100644
+index b50463c2356301a1b47a0bf4f50dc1f121d363a1..7a4028352721828c02448bb19ea07f48601c9cbc 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
-@@ -30,8 +30,8 @@ repositories {
+@@ -28,8 +28,8 @@ repositories {
  }
  
  dependencies {
@@ -19,16 +19,16 @@ index 1d3a9297544b48ee045905b220735f99d9b5c341..460c0ab661ae75382dfd86f8d56a8e8d
      // Paper start
      implementation("org.jline:jline-terminal-jansi:3.12.1")
      implementation("net.minecrell:terminalconsoleappender:1.2.0")
-@@ -82,7 +82,7 @@ tasks.jar {
+@@ -80,7 +80,7 @@ tasks.jar {
          attributes(
              "Main-Class" to "org.bukkit.craftbukkit.Main",
              "Implementation-Title" to "CraftBukkit",
 -            "Implementation-Version" to "git-Paper-$implementationVersion",
 +            "Implementation-Version" to "git-Nyper-$implementationVersion", // Nyper
-             "Implementation-Vendor" to SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").format(Date()), // Paper
+             "Implementation-Vendor" to date, // Paper
              "Specification-Title" to "Bukkit",
              "Specification-Version" to project.version,
-@@ -178,7 +178,7 @@ tasks.test {
+@@ -176,7 +176,7 @@ tasks.test {
  fun TaskContainer.registerRunTask(
      name: String, block: JavaExec.() -> Unit
  ): TaskProvider<JavaExec> = register<JavaExec>(name) {
@@ -64,10 +64,10 @@ index 3dded5c491ace6b073a7bc3178976bd70f0b9393..8d26feebc90f568b76f9125327e2c09b
  
      public SystemReport fillSystemReport(SystemReport details) {
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index c79b193ad822b8c246f24a87cd418892bc18ff5a..6ff2d32987293abc981094df283031ad69e71ac6 100644
+index 9954e45c32a4b6d80fe912ed9d55cd4fc8c4e98b..8c084e769be3f8b3874556a214d19e5689c98554 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-@@ -230,7 +230,7 @@ import javax.annotation.Nullable; // Paper
+@@ -239,7 +239,7 @@ import javax.annotation.Nullable; // Paper
  import javax.annotation.Nonnull; // Paper
  
  public final class CraftServer implements Server {
@@ -77,7 +77,7 @@ index c79b193ad822b8c246f24a87cd418892bc18ff5a..6ff2d32987293abc981094df283031ad
      private final String bukkitVersion = Versioning.getBukkitVersion();
      private final Logger logger = Logger.getLogger("Minecraft");
 diff --git a/src/main/java/org/bukkit/craftbukkit/Main.java b/src/main/java/org/bukkit/craftbukkit/Main.java
-index c3c7b34ceb1b8f0ed042b29924c633fa7519dc30..0fc4c528c4ace4b7a02da343901753f13f1d8959 100644
+index ea7df53656766a8dc4ab5fe66de894301db634e1..a9a608b7e7d4f3b252037aedb36a43c16ae45cfc 100644
 --- a/src/main/java/org/bukkit/craftbukkit/Main.java
 +++ b/src/main/java/org/bukkit/craftbukkit/Main.java
 @@ -269,7 +269,7 @@ public class Main {

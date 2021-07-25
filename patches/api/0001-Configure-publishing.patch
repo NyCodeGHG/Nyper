@@ -5,7 +5,7 @@ Subject: [PATCH] Configure publishing
 
 
 diff --git a/build.gradle.kts b/build.gradle.kts
-index 7ad3e5153718f6d4ce8293a9790bc3c1158aeb8e..5d7cad5ad8fc8b1955d63eea0ce9d300ea7447eb 100644
+index 15b8f4708887535383bb74bd922f893231737599..8724e4b4be3a1bd3ba93e85db69c2223593d40ec 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
 @@ -3,6 +3,7 @@ import java.util.Locale
@@ -16,7 +16,7 @@ index 7ad3e5153718f6d4ce8293a9790bc3c1158aeb8e..5d7cad5ad8fc8b1955d63eea0ce9d300
  }
  
  java {
-@@ -84,3 +85,5 @@ tasks.withType<Javadoc>().configureEach {
+@@ -85,3 +86,5 @@ tasks.withType<Javadoc>().configureEach {
          // Paper end
      )
  }
