@@ -1,0 +1,29 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: NyCode <nico@nycode.de>
+Date: Mon, 26 Jul 2021 00:56:03 +0200
+Subject: [PATCH] Add nyper alias
+
+
+diff --git a/src/main/java/com/destroystokyo/paper/PaperConfig.java b/src/main/java/com/destroystokyo/paper/PaperConfig.java
+index ff4101776821fe61ec79dc2e6f2cf41d1b95d744..9a0cf77441baac9da26ba7bd2b4a0e3214000e2c 100644
+--- a/src/main/java/com/destroystokyo/paper/PaperConfig.java
++++ b/src/main/java/com/destroystokyo/paper/PaperConfig.java
+@@ -69,6 +69,7 @@ public class PaperConfig {
+         commands = new HashMap<String, Command>();
+         commands.put("paper", new PaperCommand("paper"));
+         commands.put("mspt", new MSPTCommand("mspt"));
++        commands.put("nyper", new PaperCommand("nyper"));
+ 
+         version = getInt("config-version", 20);
+         set("config-version", 20);
+diff --git a/src/main/java/de/nycode/nyper/NyperConfig.java b/src/main/java/de/nycode/nyper/NyperConfig.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..e2450daffbba499194030a40d1a14e5490860dda
+--- /dev/null
++++ b/src/main/java/de/nycode/nyper/NyperConfig.java
+@@ -0,0 +1,5 @@
++package de.nycode.nyper.NyperConfig;
++
++public class NyperConfig {
++
++}
