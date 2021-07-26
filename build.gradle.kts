@@ -23,14 +23,16 @@ dependencies {
     paperclip("io.papermc:paperclip:2.0.1")
 }
 
-subprojects {
-    apply(plugin = "java")
-
+allprojects {
     java {
         toolchain {
             languageVersion.set(JavaLanguageVersion.of(16))
         }
     }
+}
+
+subprojects {
+    apply(plugin = "java")
 
     tasks.withType<JavaCompile>().configureEach {
         options.encoding = "UTF-8"
