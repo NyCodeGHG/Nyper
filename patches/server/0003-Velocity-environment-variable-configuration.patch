@@ -5,7 +5,7 @@ Subject: [PATCH] Velocity environment variable configuration
 
 
 diff --git a/src/main/java/com/destroystokyo/paper/PaperConfig.java b/src/main/java/com/destroystokyo/paper/PaperConfig.java
-index f4642259a82dbc19934772eb6ddfae682c84375e..ff4101776821fe61ec79dc2e6f2cf41d1b95d744 100644
+index 95d8cf449bf0439fddaf319246fef51e1570b68e..708a3411487f59834d049c063af22b43375fa56f 100644
 --- a/src/main/java/com/destroystokyo/paper/PaperConfig.java
 +++ b/src/main/java/com/destroystokyo/paper/PaperConfig.java
 @@ -1,8 +1,20 @@
@@ -49,7 +49,7 @@ index f4642259a82dbc19934772eb6ddfae682c84375e..ff4101776821fe61ec79dc2e6f2cf41d
  public class PaperConfig {
  
      private static File CONFIG_FILE;
-@@ -350,9 +349,32 @@ public class PaperConfig {
+@@ -354,9 +353,32 @@ public class PaperConfig {
      public static boolean velocityOnlineMode;
      public static byte[] velocitySecretKey;
      private static void velocitySupport() {
