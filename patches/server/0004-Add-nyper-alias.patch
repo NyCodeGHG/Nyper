@@ -18,11 +18,11 @@ index 708a3411487f59834d049c063af22b43375fa56f..c7551a20fc3b53299111a667e5c2800f
          set("config-version", 21);
 diff --git a/src/main/java/de/nycode/nyper/NyperConfig.java b/src/main/java/de/nycode/nyper/NyperConfig.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..e2450daffbba499194030a40d1a14e5490860dda
+index 0000000000000000000000000000000000000000..b35e808a75b33af77491f30de0216fc174a9bd5f
 --- /dev/null
 +++ b/src/main/java/de/nycode/nyper/NyperConfig.java
 @@ -0,0 +1,5 @@
-+package de.nycode.nyper.NyperConfig;
++package de.nycode.nyper;
 +
 +public class NyperConfig {
 +
