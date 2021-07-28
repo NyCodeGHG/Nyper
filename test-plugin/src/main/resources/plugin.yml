@@ -1,0 +1,15 @@
+name: "NyperTestPlugin"
+version: "1.0.0"
+author: "NyCode"
+api-version: "1.17"
+main: "de.nycode.nyper.testplugin.TestPlugin"
+
+commands:
+  namehistory:
+    description: "View Name History of a uuid"
+
+libraries:
+  - "dev.schlaubi:mojang_api:1.0-SNAPSHOT"
+
+repositories:
+  - "https://schlaubi.jfrog.io/artifactory/mojang_api"

@@ -8,3 +8,4 @@ pluginManagement {
 rootProject.name = "Nyper"
 
 include("Nyper-API", "Nyper-Server")
+include("test-plugin")
