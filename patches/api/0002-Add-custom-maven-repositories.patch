@@ -1,0 +1,206 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: NyCode <nico@nycode.de>
+Date: Wed, 28 Jul 2021 13:43:55 +0200
+Subject: [PATCH] Add custom maven repositories
+
+
+diff --git a/src/main/java/org/bukkit/plugin/PluginDescriptionFile.java b/src/main/java/org/bukkit/plugin/PluginDescriptionFile.java
+index 0c9f4d1e9104fa6951114c1f9ec954dfcc749196..3ef29445a0cb318589992dc698d7b818b8e2b612 100644
+--- a/src/main/java/org/bukkit/plugin/PluginDescriptionFile.java
++++ b/src/main/java/org/bukkit/plugin/PluginDescriptionFile.java
+@@ -3,20 +3,7 @@ package org.bukkit.plugin;
+ import com.google.common.collect.ImmutableList;
+ import com.google.common.collect.ImmutableMap;
+ import com.google.common.collect.ImmutableSet;
+-import java.io.InputStream;
+-import java.io.Reader;
+-import java.io.Writer;
+-import java.util.HashMap;
+-import java.util.HashSet;
+-import java.util.List;
+-import java.util.Map;
+-import java.util.Set;
+-import java.util.regex.Pattern;
+-import org.bukkit.command.Command;
+-import org.bukkit.command.CommandExecutor;
+-import org.bukkit.command.CommandSender;
+-import org.bukkit.command.PluginCommand;
+-import org.bukkit.command.TabCompleter;
++import org.bukkit.command.*;
+ import org.bukkit.permissions.Permissible;
+ import org.bukkit.permissions.Permission;
+ import org.bukkit.permissions.PermissionDefault;
+@@ -29,6 +16,14 @@ import org.yaml.snakeyaml.constructor.SafeConstructor;
+ import org.yaml.snakeyaml.nodes.Node;
+ import org.yaml.snakeyaml.nodes.Tag;
+ 
++import java.io.InputStream;
++import java.io.Reader;
++import java.io.Writer;
++import java.net.MalformedURLException;
++import java.net.URL;
++import java.util.*;
++import java.util.regex.Pattern;
++
+ /**
+  * This type is the runtime-container for the information in the plugin.yml.
+  * All plugins must have a respective plugin.yml. For plugins written in java
+@@ -254,6 +249,7 @@ public final class PluginDescriptionFile {
+     private Set<PluginAwareness> awareness = ImmutableSet.of();
+     private String apiVersion = null;
+     private List<String> libraries = ImmutableList.of();
++    private List<String> repositories = ImmutableList.of(); // Nyper
+ 
+     public PluginDescriptionFile(@NotNull final InputStream stream) throws InvalidDescriptionException {
+         loadMap(asMap(YAML.get().load(stream)));
+@@ -980,6 +976,20 @@ public final class PluginDescriptionFile {
+         return libraries;
+     }
+ 
++    /**
++     * Gets the repositories this plugin requires. This is a preview feature.
++     * Libraries must be https urls.
++     * Maven Central is included by default.
++     * <p>
++     * Example:<blockquote><pre>repositories:
++     *     - https://nycode.jfrog.io/artifactory/maven-public/</pre></blockquote>
++     *
++     * @return required libraries
++     */
++    public List<String> getRepositories() {
++        return repositories;
++    }
++
+     /**
+      * @return unused
+      * @deprecated unused
+@@ -1164,6 +1174,26 @@ public final class PluginDescriptionFile {
+             libraries = ImmutableList.<String>of();
+         }
+ 
++        if (map.get("repositories") != null) {
++            ImmutableList.Builder<String> repositoriesBuilder = ImmutableList.builder();
++            try {
++                for (Object o : ((Iterable<?>) map.get("repositories"))) {
++                    var url = new URL(o.toString());
++                    if (!url.getProtocol().equals("https")) {
++                        throw new InvalidDescriptionException(String.format("%s has an unsupported protocol! Please use https!", o));
++                    }
++                    repositoriesBuilder.add(o.toString());
++                }
++            } catch (ClassCastException ex) {
++                throw new InvalidDescriptionException(ex, "repositories are of wrong type");
++            } catch (MalformedURLException ex) {
++                throw new InvalidDescriptionException(ex, "repositories contains an invalid url");
++            }
++            repositories = repositoriesBuilder.build();
++        } else {
++            repositories = ImmutableList.of();
++        }
++
+         try {
+             lazyPermissions = (Map<?, ?>) map.get("permissions");
+         } catch (ClassCastException ex) {
+@@ -1242,6 +1272,10 @@ public final class PluginDescriptionFile {
+             map.put("libraries", libraries);
+         }
+ 
++        if (repositories != null) {
++            map.put("repositories", repositories);
++        }
++
+         if (classLoaderOf != null) {
+             map.put("class-loader-of", classLoaderOf);
+         }
+diff --git a/src/main/java/org/bukkit/plugin/java/LibraryLoader.java b/src/main/java/org/bukkit/plugin/java/LibraryLoader.java
+index 939afec1f21f46170d5eff286cf9d698c233e1f4..22d18d3e50f785fbccfc53a1330e0bde397c6dc0 100644
+--- a/src/main/java/org/bukkit/plugin/java/LibraryLoader.java
++++ b/src/main/java/org/bukkit/plugin/java/LibraryLoader.java
+@@ -1,15 +1,6 @@
+ // CHECKSTYLE:OFF
+ package org.bukkit.plugin.java;
+ 
+-import java.io.File;
+-import java.net.MalformedURLException;
+-import java.net.URL;
+-import java.net.URLClassLoader;
+-import java.util.ArrayList;
+-import java.util.Arrays;
+-import java.util.List;
+-import java.util.logging.Level;
+-import java.util.logging.Logger;
+ import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
+ import org.bukkit.plugin.PluginDescriptionFile;
+ import org.eclipse.aether.DefaultRepositorySystemSession;
+@@ -36,13 +27,23 @@ import org.eclipse.aether.transport.http.HttpTransporterFactory;
+ import org.jetbrains.annotations.NotNull;
+ import org.jetbrains.annotations.Nullable;
+ 
++import java.io.File;
++import java.net.MalformedURLException;
++import java.net.URL;
++import java.net.URLClassLoader;
++import java.util.ArrayList;
++import java.util.List;
++import java.util.UUID;
++import java.util.logging.Level;
++import java.util.logging.Logger;
++import java.util.stream.Collectors;
++
+ class LibraryLoader
+ {
+ 
+     private final Logger logger;
+     private final RepositorySystem repository;
+     private final DefaultRepositorySystemSession session;
+-    private final List<RemoteRepository> repositories;
+ 
+     public LibraryLoader(@NotNull Logger logger)
+     {
+@@ -66,8 +67,6 @@ class LibraryLoader
+             }
+         } );
+         session.setReadOnly();
+-
+-        this.repositories = repository.newResolutionRepositories( session, Arrays.asList( new RemoteRepository.Builder( "central", "default", "https://repo.maven.apache.org/maven2" ).build() ) );
+     }
+ 
+     @Nullable
+@@ -83,6 +82,10 @@ class LibraryLoader
+         } );
+ 
+         List<Dependency> dependencies = new ArrayList<>();
++        // Nyper start
++        var pluginRepos = desc.getRepositories();
++        var repos = buildRepositories(pluginRepos);
++        // Nyper end
+         for ( String library : desc.getLibraries() )
+         {
+             Artifact artifact = new DefaultArtifact( library );
+@@ -94,7 +97,7 @@ class LibraryLoader
+         DependencyResult result;
+         try
+         {
+-            result = repository.resolveDependencies( session, new DependencyRequest( new CollectRequest( (Dependency) null, dependencies, repositories ), null ) );
++            result = repository.resolveDependencies( session, new DependencyRequest( new CollectRequest( (Dependency) null, dependencies, repos ), null ) ); // Nyper
+         } catch ( DependencyResolutionException ex )
+         {
+             throw new RuntimeException( "Error resolving libraries", ex );
+@@ -125,4 +128,17 @@ class LibraryLoader
+ 
+         return loader;
+     }
++    // Nyper start
++    private static final RemoteRepository MAVEN_CENTRAL =
++        new RemoteRepository.Builder("central", "default", "https://repo.maven.apache.org/maven2").build();
++
++    private List<RemoteRepository> buildRepositories(List<String> repos) {
++        var remoteRepos = repos.stream()
++                               .map(repo -> new RemoteRepository.Builder(UUID.randomUUID()
++                                                                             .toString(), "default", repo).build())
++                               .collect(Collectors.toList());
++        remoteRepos.add(MAVEN_CENTRAL);
++        return repository.newResolutionRepositories(session, remoteRepos);
++    }
++    // Nyper end
+ }
